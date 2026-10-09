@@ -9,11 +9,13 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/docs/Web/JavaScript)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Status](https://img.shields.io/badge/status-live-success.svg)](#-دموی-زنده)
+[![Made in Iran](https://img.shields.io/badge/made%20in-Iran-239f40.svg)](#)
 
 **Live USD & Gold prices for the Iranian market — serverless, free, zero-maintenance.**
 **قیمت لحظه‌ای دلار و طلا برای بازار ایران — بدون سرور، رایگان، بدون نگهداری.**
 
-[ویژگی‌ها](#-ویژگیها) • [نصب](#-نصب-و-راهاندازی) • [معماری](#-معماری-پروژه) • [داستان ساخت](#-داستان-ساخت--انسان--هوش-مصنوعی)
+[ویژگی‌ها](#-ویژگیها) • [دموی زنده](#-دموی-زنده) • [نصب](#-نصب-و-راهاندازی) • [معماری](#-معماری-پروژه) • [داستان ساخت](#-داستان-ساخت--انسان--هوش-مصنوعی)
 
 </div>
 
@@ -23,9 +25,24 @@
 
 یه ربات تلگرام سبک و سریع که قیمت لحظه‌ای **دلار آزاد** و **طلای ۱۸ عیار** رو از [TGJU](https://www.tgju.org) می‌گیره و با دکمه‌های شیشه‌ای به کاربر نشون می‌ده. همه چیز روی **Cloudflare Workers** اجرا می‌شه — بدون نیاز به سرور، VPS، یا حتی یه خط کد پایتون.
 
+**بیش از ۱۰ روزه که بدون وقفه در حال کاره.** ⚡
+
 ### What is this?
 
 A lightweight Telegram bot that pulls live **USD** and **18K Gold** prices from TGJU for the Iranian market — with inline keyboard buttons, auto-updates via Cron, and zero server management. Runs entirely on Cloudflare's free tier.
+
+---
+
+## 🌐 دموی زنده
+
+**آدرس Worker:** [`https://price-bot.nyqfvqaoivkpvq0ndd1r8if.workers.dev`](https://price-bot.nyqfvqaoivkpvq0ndd1r8if.workers.dev)
+
+| Endpoint | توضیح |
+|----------|-------|
+| `/` | بررسی فعال بودن ربات |
+| `/test` | نمایش JSON قیمت‌های لحظه‌ای (برای دیباگ) |
+| `/setup` | تنظیم Webhook تلگرام (یک بار) |
+| `/webhook` | دریافت پیام‌های تلگرام (خودکار) |
 
 ---
 
@@ -43,23 +60,40 @@ A lightweight Telegram bot that pulls live **USD** and **18K Gold** prices from 
 - 🕒 **ساعت درست ایران** — بدون مشکل daylight saving
 - 📊 **لیست کاربران** — دستور `/users` فقط برای ادمین
 - 💾 **ذخیره‌سازی بهینه** — KV write فقط وقتی اطلاعات تغییر کنه
+- 🔄 **Fallback خودکار** — اگه سرور TGJU قطع شد، سراغ آینه بعدی می‌ره
+- 🚫 **ضد کش** — با cache-buster، همیشه قیمت تازه می‌گیره
 
 ---
 
 ## 📸 اسکرین‌شات‌ها
 
-> _در حال اضافه شدن — یه اسکرین‌شات از ربات در تلگرام و یه اسکرین‌شات از داشبورد Cloudflare اینجا قرار بگیره._
+<div align="center">
+
+### 💬 چت ربات در تلگرام
+![Bot Chat](./screenshots/bot-chat.png)
+
+### ⌨️ دکمه‌های شیشه‌ای
+![Bot Buttons](./screenshots/bot-buttons.png)
+
+### ☁️ داشبورد Cloudflare
+![Cloudflare Dashboard](./screenshots/cloudflare.png)
+
+</div>
+
+### نمونه خروجی پیام
 
 ```
-┌────────────────────────────────────┐
-│  💵 دلار: 243,800 تومان 🟢 3.74%   │
+┌────────────────────────────────────────┐
+│  💵 دلار: 243,800 تومان 🟢 3.74%       │
 │  🥇 طلا ۱۸: 24,443,400 تومان 🟢 2.27% ⚠️ │
-│  🕒 ۱۴۰۵/۷/۷، ۱۲:۳۰:۰۰            │
-│                                    │
-│  [💵 قیمت دلار] [🥇 قیمت طلا]      │
-│  [      📊 قیمت کامل      ]        │
-└────────────────────────────────────┘
+│  🕒 ۱۴۰۵/۷/۷، ۱۲:۳۰:۰۰                │
+│                                        │
+│  [💵 قیمت دلار] [🥇 قیمت طلا]          │
+│  [      📊 قیمت کامل      ]            │
+└────────────────────────────────────────┘
 ```
+
+> ⚠️ وقتی نوسان روزانه از ۲٪ بگذره، این علامت به پیام اضافه می‌شه.
 
 ---
 
@@ -82,6 +116,14 @@ A lightweight Telegram bot that pulls live **USD** and **18K Gold** prices from 
                       └──────────────┘
 ```
 
+### جریان داده
+
+1. **کاربر** به ربات پیام می‌ده یا دکمه می‌زنه.
+2. **تلگرام** پیام رو به `/webhook` می‌فرسته.
+3. **Worker** قیمت رو از TGJU می‌گیره.
+4. **Worker** پاسخ رو به تلگرام برمی‌گردونه.
+5. **Cron** هر ۵ دقیقه: قیمت جدید می‌گیره، اگه تغییر کرده بود به همه کاربران پیام می‌فرسته.
+
 ### چرا Cloudflare Workers؟
 
 | مزیت | توضیح |
@@ -92,6 +134,7 @@ A lightweight Telegram bot that pulls live **USD** and **18K Gold** prices from 
 | ⏰ **Cron Triggers** | به‌روزرسانی خودکار بدون سرویس خارجی |
 | 🔐 **HTTPS رایگان** | SSL خودکار |
 | 🚀 **Deploy در ۲ دقیقه** | فقط کپی پیست و یه کلیک |
+| 📊 **Observability** | لاگ‌های زنده و مانیتورینگ کامل |
 
 ---
 
@@ -101,48 +144,55 @@ A lightweight Telegram bot that pulls live **USD** and **18K Gold** prices from 
 
 - حساب [Telegram](https://telegram.org) (برای ساخت ربات)
 - حساب رایگان [Cloudflare](https://dash.cloudflare.com/sign-up)
-- یه مرورگر (همه کارها از داشبورد Cloudflare انجام می‌شه)
+- یه مرورگر (همه کارها از داشبورد Cloudflare انجام می‌شه — **نیازی به نصب چیزی نیست**)
+
+> 💡 این پروژه حتی از روی موبایل هم می‌تونه Deploy بشه. نیازی به لپ‌تاپ یا Node.js نداری.
 
 ### مرحله ۱ — ساخت ربات در تلگرام
 
-1. در تلگرام، [@BotFather](https://t.me/BotFather) رو باز کن
-2. دستور `/newbot` رو بفرست
-3. یه **نام** برای ربات وارد کن (مثلاً `My Price Bot`)
-4. یه **یوزرنیم** وارد کن که به `bot` ختم بشه (مثلاً `my_price_bot`)
-5. **توکن** رو کپی کن (شبیه این: `123456789:AAHxxx...`) — این رو یه جای امن نگه‌دار
+1. در تلگرام، [@BotFather](https://t.me/BotFather) رو باز کن.
+2. دستور `/newbot` رو بفرست.
+3. یه **نام** برای ربات وارد کن (مثلاً `My Price Bot`).
+4. یه **یوزرنیم** وارد کن که به `bot` ختم بشه (مثلاً `my_price_bot`).
+5. **توکن** رو کپی کن (شبیه این: `123456789:AAHxxxxxxxxxxxxxxxxxxxx`) — این رو یه جای امن نگه‌دار.
 
 ### مرحله ۲ — گرفتن Chat ID
 
-به [@userinfobot](https://t.me/userinfobot) پیام بده و عدد `Id:` رو کپی کن. این می‌شه **Chat ID** خودت.
+به [@userinfobot](https://t.me/userinfobot) پیام بده و عدد `Id:` رو کپی کن. این می‌شه **Chat ID** خودت (برای دستور `/users` به `ADMIN_CHAT_ID` نیاز داری).
 
 ### مرحله ۳ — ساخت KV Namespace
 
-1. وارد [dash.cloudflare.com](https://dash.cloudflare.com) شو
-2. از منوی چپ: **Workers & Pages → KV**
-3. روی **Create a namespace** کلیک کن
-4. نام: `PRICE_KV` → **Add**
+1. وارد [dash.cloudflare.com](https://dash.cloudflare.com) شو.
+2. از منوی چپ: **Workers & Pages → KV**.
+3. روی **Create a namespace** کلیک کن.
+4. نام: `PRICE_KV` → **Add**.
 
 ### مرحله ۴ — ساخت Worker
 
-1. **Workers & Pages → Create application → Create Worker**
-2. نام: `price-bot` → **Deploy**
-3. روی **Edit code** کلیک کن
-4. کد کامل از فایل [`worker.js`](./worker.js) رو کپی کن و جای کد پیش‌فرض بذار
-5. **Save and Deploy** بزن
+1. **Workers & Pages → Create application → Create Worker**.
+2. نام: `price-bot` → **Deploy**.
+3. روی **Edit code** کلیک کن.
+4. کد کامل از فایل [`worker.js`](./worker.js) رو کپی کن و جای کد پیش‌فرض بذار.
+5. **Save and Deploy** بزن.
 
 ### مرحله ۵ — تنظیمات Worker
 
 #### الف) اتصال KV
+
 - **Settings → Bindings → Add binding**
   - Variable name: `PRICE_KV`
   - KV namespace: `PRICE_KV`
 
 #### ب) متغیرهای محیطی
+
 - **Settings → Variables and Secrets → Add variable**
   - نام: `TELEGRAM_BOT_TOKEN` — نوع: **Secret** — مقدار: توکنی که از BotFather گرفتی
   - نام: `TELEGRAM_CHAT_ID` — نوع: **Secret** — مقدار: Chat ID خودت
 
+> ⚠️ **نکته امنیتی**: مقدار `TELEGRAM_BOT_TOKEN` رو حتماً روی **Secret** بذار، نه Text. اینطوری توی UI نمایش داده نمی‌شه.
+
 #### ج) Cron Trigger
+
 - **Settings → Triggers → Add Cron Trigger**
   - عبارت: `*/5 * * * *` (هر ۵ دقیقه)
   - **Add**
@@ -155,11 +205,21 @@ A lightweight Telegram bot that pulls live **USD** and **18K Gold** prices from 
 https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev/setup
 ```
 
-باید ببینی: `{"ok":true,"result":true,"description":"Webhook was set"}`
+باید ببینی:
+
+```json
+{"ok":true,"result":true,"description":"Webhook was set"}
+```
 
 ### مرحله ۷ — تست
 
 در تلگرام، به ربات خودت `/start` بفرست. باید پیام خوش‌آمد + دکمه‌ها بیاد. تمام! 🎉
+
+برای تست سریع قیمت‌ها، این آدرس رو هم می‌تونی باز کنی:
+
+```
+https://YOUR-WORKER.workers.dev/test
+```
 
 ---
 
@@ -172,7 +232,7 @@ https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev/setup
 | `/dollar` یا `دلار` | فقط قیمت دلار |
 | `/gold` یا `طلا` | فقط قیمت طلا |
 | `/help` یا `راهنما` | نمایش راهنما |
-| `/users` 🔒 | لیست کاربران (فقط ادمین) |
+| `/users` یا `/کاربران` 🔒 | لیست کاربران (فقط ادمین) |
 
 🔒 = فقط برای Chat ID‌ای که در `ADMIN_CHAT_ID` تنظیم شده.
 
@@ -180,15 +240,22 @@ https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev/setup
 
 ## 🛠 پیکربندی
 
-در کد Worker، این مقادیر قابل تنظیم هستن:
+در ابتدای فایل `worker.js`، این مقادیر قابل تنظیم هستن:
 
 ```javascript
 // آستانه هشدار نوسان (درصد)
 const VOLATILITY_THRESHOLD = 2;
 
 // Chat ID ادمین (برای دستور /users)
-const ADMIN_CHAT_ID = 123456789;
+// از @userinfobot بگیر و اینجا بذار
+const ADMIN_CHAT_ID = 0; // ← عدد واقعی خودت
 ```
+
+| تنظیم | توضیح | پیشنهاد |
+|-------|-------|---------|
+| `VOLATILITY_THRESHOLD` | آستانه هشدار ⚠️ | `2` (یعنی ۲٪) |
+| `ADMIN_CHAT_ID` | Chat ID ادمین | عدد خودت از `@userinfobot` |
+| `Cron` (در داشبورد) | فاصله به‌روزرسانی | `*/5 * * * *` (هر ۵ دقیقه) |
 
 ---
 
@@ -208,27 +275,43 @@ const ADMIN_CHAT_ID = 123456789;
 
 | نقش | کارها |
 |-----|-------|
-| **انسان** | تعریف نیاز، تست عملی، تصمیم‌گیری روی معماری، دیباگ واقعی، تست میدانی روی ترموکس و موبایل، بازخورد روی هر تغییر |
-| **هوش مصنوعی** | پیشنهاد منابع داده، نوشتن کد، ساختاردهی معماری، دیباگ خطاها، توضیح مفاهیم، بهینه‌سازی |
+| **انسان** | تعریف نیاز، تست عملی، تصمیم‌گیری روی معماری، دیباگ واقعی، تست میدانی روی ترموکس و موبایل، بازخورد روی هر تغییر، ساخت و نگهداری ربات در محیط واقعی |
+| **هوش مصنوعی (Claude)** | پیشنهاد منابع داده، نوشتن کد، ساختاردهی معماری، دیباگ خطاها، توضیح مفاهیم، بهینه‌سازی، مستندسازی |
 
 ### 🎞 مسیر واقعی
 
-1. **کشف منابع** — چند API مختلف (PriceDB, Navasan, Alanchand, Nobitex, TGJU) تست شدن. هر کدوم مشکل خودش رو داشت:
-   - PriceDB → پشت Cloudflare Challenge، بی‌فایده
-   - Navasan رایگان → فقط ۱۲۰ درخواست در ماه، نمی‌کشه
-   - Alanchand → نیاز به توکن پولی
-   - Nobitex → تتر رو می‌ده، نه دلار آزاد
-   - **TGJU** → دقيقاً چیزی که می‌خواستیم ✅
+**۱. کشف منابع** — چند API مختلف تست شدن. هر کدوم مشکل خودش رو داشت:
 
-2. **معماری Serverless** — تصمیم گرفته شد پروژه روی Cloudflare Workers اجرا بشه (رایگان، سریع، بدون سرور).
+| منبع | مشکل |
+|------|------|
+| PriceDB | پشت Cloudflare Challenge، بی‌فایده |
+| Navasan رایگان | فقط ۱۲۰ درخواست در ماه، نمی‌کشه |
+| Alanchand | نیاز به توکن پولی |
+| Nobitex | تتر رو می‌ده، نه دلار آزاد |
+| **TGJU** | ✅ **دقیقاً چیزی که می‌خواستیم** |
 
-3. **دیباگ‌های واقعی**:
-   - مشکل ساعت: TGJU زمان رو با DST قدیمی ایران می‌فرستاد → با `new Date()` حل شد.
-   - مشکل کش: Cloudflare پاسخ‌های قدیمی رو کش می‌کرد → با cache buster حل شد.
-   - مشکل نصب: Wrangler روی Termux نصب نمی‌شد → معماری به داشبورد-only تغییر کرد.
-   - مشکل اسپم: Cron هر ۵ دقیقه پیام می‌فرستاد → با `lastBroadcast` در KV حل شد.
+**۲. معماری Serverless** — تصمیم گرفته شد پروژه روی **Cloudflare Workers** اجرا بشه (رایگان، سریع، بدون سرور، قابل Deploy از داشبورد).
 
-4. **فیچرهای تدریجی**: از یه ربات ساده شروع شد و کم‌کم شد: دکمه شیشه‌ای، ساعت درست، هشدار نوسان، لیست کاربران، ذخیره‌سازی بهینه.
+**۳. دیباگ‌های واقعی:**
+
+| مشکل | راه‌حل |
+|------|-------|
+| TGJU زمان رو با DST قدیمی ایران می‌فرستاد | استفاده از `new Date()` به جای `tgjuTime` |
+| Cloudflare پاسخ‌های قدیمی رو کش می‌کرد | cache-buster + غیرفعال کردن cache |
+| Wrangler روی Termux (android arm64) نصب نمی‌شد | معماری به dashboard-only تغییر کرد |
+| Cron هر ۵ دقیقه پیام تکراری می‌فرستاد | ذخیره `lastBroadcast` در KV |
+| بعد از چند روز چت کاربر پر از پیام می‌شد | ضد اسپم با شرط تغییر قیمت |
+
+**۴. فیچرهای تدریجی:**
+
+از یه ربات ساده شروع شد و کم‌کم شد:
+- ✅ دکمه‌های شیشه‌ای
+- ✅ ساعت درست ایران
+- ✅ هشدار نوسان ⚠️
+- ✅ لیست کاربران (دستور `/users`)
+- ✅ ذخیره‌سازی بهینه KV
+- ✅ Fallback چند سرور TGJU
+- ✅ ضد کش
 
 ### 💭 چرا این داستان مهمه؟
 
@@ -246,8 +329,46 @@ tgju-telegram-price-bot/
 ├── wrangler.toml       # فایل پیکربندی (اختیاری، برای CLI)
 ├── README.md           # همین فایل
 ├── LICENSE             # MIT
-└── .gitignore          # نادیده گرفتن node_modules و...
+├── .gitignore          # نادیده گرفتن node_modules و...
+└── screenshots/        # تصاویر ربات
+    ├── bot-chat.png
+    ├── bot-buttons.png
+    └── cloudflare.png
 ```
+
+---
+
+## 🔐 امنیت
+
+### چرا کد این پروژه امن است؟
+
+- 🔒 **هیچ توکنی داخل کد نیست.** همه از `env` خونده می‌شن.
+- 🔑 **توکن ربات** به عنوان **Secret** در Cloudflare ذخیره می‌شه (نه در کد، نه در گیت‌هاب).
+- 🚫 **فایل `.env` و `.dev.vars`** توی `.gitignore` هستن.
+- 🛡 **Webhook** فقط از طرف سرورهای تلگرام پاسخ می‌گیره.
+- ✅ **`ADMIN_CHAT_ID`** تنها اطلاعات غیرحساسی است که در کد می‌مونه (فقط برای دستور `/users`).
+
+### اگر توکن لو رفت چیکار کنم؟
+
+1. به [@BotFather](https://t.me/BotFather) برو → `/mybots` → ربات رو انتخاب کن → **API Token → Revoke**.
+2. توکن جدید رو در Cloudflare → **Settings → Variables → TELEGRAM_BOT_TOKEN** جایگزین کن.
+3. **Save and Deploy** بزن.
+
+---
+
+## 📊 آمار مصرف (پلن رایگان)
+
+بعد از ۱۰ روز کارکرد بدون وقفه:
+
+| متریک | مصرف | محدودیت رایگان | وضعیت |
+|-------|------|----------------|--------|
+| **Total Requests** | ~500 | ۱۰۰,۰۰۰ / روز | ✅ |
+| **Worker Invocations** | ~230 | - | ✅ |
+| **Errors** | ۰ | - | ✅ |
+| **CPU time (P90)** | ۷ms | ۱۰ms / درخواست | ✅ |
+| **KV Reads/Writes** | کم | ۱۰۰,۰۰۰ / ۱,۰۰۰ | ✅ |
+
+**نتیجه:** حتی با ۱۰۰ کاربر فعال، چند صد برابر ظرفیت باقی‌مونده داری. 👌
 
 ---
 
@@ -255,21 +376,34 @@ tgju-telegram-price-bot/
 
 هر کسی می‌تونه مشارکت کنه! راه‌ها:
 
-1. 🍴 **Fork** کن
-2. 🌿 یه **branch** جدید بساز (`git checkout -b feature/awesome-thing`)
-3. 💾 **Commit** کن (`git commit -m 'افزودن فیچر فلان'`)
-4. 📤 **Push** کن (`git push origin feature/awesome-thing`)
-5. 🎯 یه **Pull Request** باز کن
+1. 🍴 **Fork** کن.
+2. 🌿 یه **branch** جدید بساز (`git checkout -b feature/awesome-thing`).
+3. 💾 **Commit** کن (`git commit -m 'feat: افزودن فیچر فلان'`).
+4. 📤 **Push** کن (`git push origin feature/awesome-thing`).
+5. 🎯 یه **Pull Request** باز کن.
+
+### قرارداد Commit
+
+از [Conventional Commits](https://www.conventionalcommits.org/) استفاده می‌کنیم:
+
+| پیشوند | کاربرد |
+|--------|--------|
+| `feat:` | فیچر جدید |
+| `fix:` | رفع باگ |
+| `docs:` | تغییرات مستندات |
+| `refactor:` | بازنویسی بدون تغییر رفتار |
+| `chore:` | کارهای جانبی |
 
 ### ایده‌های فیچر
 
 - [ ] افزودن سکه امامی و نیم
 - [ ] نمودار قیمت ۷ روزه
-- [ ] تنظیم ساعت اعلان توسط کاربر
-- [ ] دکمه لغو اشتراک
-- [ ] افزودن یورو و درهم
+- [ ] تنظیم ساعت اعلان توسط کاربر (مثلاً فقط ۹ صبح تا ۹ شب)
+- [ ] دکمه لغو اشتراک (کاربر پیام خودکار نگیره)
+- [ ] افزودن یورو و درهم و سایر ارزها
 - [ ] دستور `/stats` برای آمار ربات
 - [ ] پشتیبانی از چند زبان (انگلیسی، عربی)
+- [ ] ذخیره تاریخچه قیمت برای نمودار
 
 ---
 
@@ -286,6 +420,8 @@ tgju-telegram-price-bot/
 - 🙋 **انسان**: صاحب ایده، توسعه‌دهنده اصلی، تستر میدانی
 - 🤖 **هوش مصنوعی (Claude، Anthropic)**: همکار در نوشتن کد، دیباگ، معماری و مستندسازی
 - 📊 **TGJU**: منبع داده قیمت لحظه‌ای
+- ☁️ **Cloudflare Workers**: زیرساخت اجرا (رایگان)
+- 💬 **Telegram Bot API**: پلتفرم ارتباط با کاربران
 
 > این پروژه با همکاری واقعی **انسان و AI** ساخته شده. اگه تو هم یه پروژه مشابه داشتی، خوشحال می‌شیم بشنویم.
 
@@ -295,6 +431,8 @@ tgju-telegram-price-bot/
 
 **⭐ اگه این پروژه به کارت اومد، یه ستاره بده! ⭐**
 
-Made with ❤️ + 🤖 in Iran
+ساخته‌شده با ❤️ + 🤖 در ایران
+
+**[⬆ بازگشت به بالا](#-tgju-telegram-price-bot)**
 
 </div>
