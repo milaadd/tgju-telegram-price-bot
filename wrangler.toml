@@ -1,0 +1,10 @@
+name = "price-bot"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "PRICE_KV"
+id = "YOUR_KV_NAMESPACE_ID" # از داشبورد Cloudflare دریافت کنید
+
+[triggers]
+crons = ["*/5 * * * *"]
